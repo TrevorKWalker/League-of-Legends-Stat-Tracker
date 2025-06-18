@@ -1,6 +1,12 @@
 import requests
+from dotenv import load_dotenv
+import os
 
-API_KEY = "RGAPI-0d0981e5-b09b-406d-aaaa-fa2e318d13fe"
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+
+
+
 SUMMONER_NAME = "King Kylan"
 TAG_LINE = "NA1"
 REGION = "americas"
