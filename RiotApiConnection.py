@@ -1,56 +1,102 @@
 import requests
+from dotenv import load_dotenv
+import os
 
-API_KEY = "RGAPI-3b297c80-305b-4a07-8248-3900fa0ab50f"
+
+# You must have a file called .env that has a line API_KEY=your-key
+# replacing your-key with the api key that you get from the riot developer portal
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+
+
+
 SUMMONER_NAME = "King Kylan"
-REGION = "na1"  # use appropriate routing value like euw1, kr, etc.
-MATCH_REGION = "americas"  # for match-v5 (depends on summoner's region)
+TAG_LINE = "NA1"
+REGION = "americas"
 
-# Headers for Riot API
-HEADERS = {
+#SUMMONER_NAME = "CalicoAze"
+#TAG_LINE = "3023"
+#REGION = "americas"
+
+headers = {
     "X-Riot-Token": API_KEY
 }
 
-def get_summoner_puuid(summoner_name):
-    url = f"https://{REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
-    response = requests.get(url, headers=HEADERS)
-    if response.status_code == 200:
-        return response.json()['puuid']
-    else:
-        raise Exception(f"Failed to get PUUID: {response.status_code} - {response.text}")
+# Match_region needs to be the players region
+# Summoner name is the username of the player in game
+# tagline is is the #NA1 or tag that comes after the summoner name in client but without the #
+def Get_Puuid(match_region, Summoner_name, tag_line):
 
-def get_match_ids(puuid, count=10):
-    url = f"https://{MATCH_REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}"
-    response = requests.get(url, headers=HEADERS)
+    #get request that returns puuid 
+    url = f"https://{match_region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{Summoner_name}/{tag_line}"
+
+    response = requests.get(url, headers=headers)
+    
+    #checks if the response is valid
+    if response.status_code == 200:
+
+        data = response.json()
+        return data["puuid"]
+    else:
+        raise Exception(f"Failed to get Puuid: {response.status_code} - {response.text}")
+
+def Get_Summoner(Puuid):
+
+    #get request that returns puuid 
+    url = f"https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{Puuid}"
+
+    response = requests.get(url, headers=headers)
+    
+    #checks if the response is valid
+    if response.status_code == 200:
+
+        data = response.json()
+        return data
+    else:
+        raise Exception(f"Failed to get Summoner: {response.status_code} - {response.text}")
+
+
+def Get_Match_history(Puuid):
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{Puuid}/ids"
+    response = requests.get(url, headers=headers, params={"count" :50})
+
     if response.status_code == 200:
         return response.json()
     else:
-        raise Exception(f"Failed to get match IDs: {response.status_code} - {response.text}")
+        print(response.status_code, response.text)
+        return None
+    
 
-def get_match_details(match_id):
-    url = f"https://{MATCH_REGION}.api.riotgames.com/lol/match/v5/matches/{match_id}"
-    response = requests.get(url, headers=HEADERS)
+def Match_data_from_match_id(match_id, player_puuid):
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}?{API_KEY}"
+    response = requests.get(url, headers=headers)
+        #checks if the response is valid
     if response.status_code == 200:
-        return response.json()
+
+        data = response.json()
+        for player in data["info"]["participants"]:
+            if player["puuid"] == player_puuid:
+                return player
     else:
-        raise Exception(f"Failed to get match details: {response.status_code} - {response.text}")
+        raise Exception(f"Failed to get Puuid: {response.status_code} - {response.text}")
+
 
 def main():
-    try:
-        puuid = get_summoner_puuid(SUMMONER_NAME)
-        print(f"PUUID for {SUMMONER_NAME}: {puuid}")
+    puuid = Get_Puuid(REGION,SUMMONER_NAME, TAG_LINE)
+    print("Puuid is" , puuid)
 
-        match_ids = get_match_ids(puuid)
-        print(f"Recent Match IDs: {match_ids}")
 
-        for match_id in match_ids:
-            match_data = get_match_details(match_id)
-            print(f"Match ID: {match_id}")
-            print("Game Mode:", match_data['info']['gameMode'])
-            print("Participants:", [p['summonerName'] for p in match_data['info']['participants']])
-            print("-" * 40)
+    history = Get_Match_history(puuid)
+    time = 0
+    for match in history:
 
-    except Exception as e:
-        print("Error:", e)
+        recent_game = Match_data_from_match_id(history[0], puuid)
+        time += recent_game['totalTimeSpentDead']
+    print(time)
+    print(f"{recent_game['riotIdGameName']} played {recent_game['championName']} and had {recent_game['kills']} kills and spent {recent_game['totalTimeSpentDead']} seconds dead.")
+
+
+
 
 if __name__ == "__main__":
     main()
