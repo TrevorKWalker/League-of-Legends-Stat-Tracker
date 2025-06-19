@@ -1,25 +1,24 @@
 import requests
 from dotenv import load_dotenv
 import os
+import json
 
 
 # You must have a file called .env that has a line API_KEY=your-key
 # replacing your-key with the api key that you get from the riot developer portal
 load_dotenv()
-API_KEY = os.getenv("API_KEY")
+RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 
 
 
-SUMMONER_NAME = "King Kylan"
-TAG_LINE = "NA1"
-REGION = "americas"
+SUMMONERS = json.loads(os.getenv("Summoners"))
 
-#SUMMONER_NAME = "CalicoAze"
-#TAG_LINE = "3023"
-#REGION = "americas"
+
+
+
 
 headers = {
-    "X-Riot-Token": API_KEY
+    "X-Riot-Token": RIOT_API_KEY
 }
 
 # Match_region needs to be the players region
@@ -58,7 +57,7 @@ def Get_Summoner(Puuid):
 
 def Get_Match_history(Puuid):
     url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{Puuid}/ids"
-    response = requests.get(url, headers=headers, params={"count" :50})
+    response = requests.get(url, headers=headers, params={"count" :5})
 
     if response.status_code == 200:
         return response.json()
@@ -68,7 +67,7 @@ def Get_Match_history(Puuid):
     
 
 def Match_data_from_match_id(match_id, player_puuid):
-    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}?{API_KEY}"
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}?{RIOT_API_KEY}"
     response = requests.get(url, headers=headers)
         #checks if the response is valid
     if response.status_code == 200:
@@ -82,6 +81,11 @@ def Match_data_from_match_id(match_id, player_puuid):
 
 
 def main():
+    print(SUMMONERS)
+    for x, y in SUMMONERS.items():
+        print( "test")
+        print(y["tag"])
+    """
     puuid = Get_Puuid(REGION,SUMMONER_NAME, TAG_LINE)
     print("Puuid is" , puuid)
 
@@ -94,7 +98,7 @@ def main():
         time += recent_game['totalTimeSpentDead']
     print(time)
     print(f"{recent_game['riotIdGameName']} played {recent_game['championName']} and had {recent_game['kills']} kills and spent {recent_game['totalTimeSpentDead']} seconds dead.")
-
+    """
 
 
 
