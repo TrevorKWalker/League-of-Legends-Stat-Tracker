@@ -12,7 +12,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-def Create_and_Write_To_Spreadsheet(file, name, token_path):
+def connect_to_client(token_path):
 # Token file stores the user's access/refresh tokens
     creds = None
     if os.path.exists(token_path):
@@ -31,23 +31,39 @@ def Create_and_Write_To_Spreadsheet(file, name, token_path):
 
 # Authorize gspread client
     client = gspread.authorize(creds)
+    return client
 
-# Create new spreadsheet in your Google Drive
-    spreadsheet = client.create(name)
+# these next fours functions aren't neccassary as they are one line and therefore kinda redundant and useless
+########################################
+# Creates a spreadsheet with a given name
+def create_spreadsheet(client, name):
+    return client.create(name)
+# Opens a spreadsheet with a given name
+def open_spreadsheet(client, name):
+    return client.open(name)  
+# creates a worksheet
+def create_worksheet(spreadsheet, name, rows = 100, cols = 100):
+    return spreadsheet.add_worksheet(title=name, rows=rows, cols=cols)
+# opens a worksheet
+def open_worksheet(spreadsheet, name):
+    return spreadsheet.worksheet(name)
+######################################
 
-# Open the first sheet
-    sheet = spreadsheet.sheet1
+#takes a worksheet and file path of a .csv file and clears the worksheet before upload the contents of the csv file
+def upload_csv_to_worksheet(worksheet, csv_name):
 
-# Read and parse CSV
-    with open(file, newline='', encoding='utf-8') as f:
+    worksheet.clear()
+    with open(csv_name, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
         data = list(reader)
-
-# Insert data starting at A1
-    sheet.update("A1", data)
-
-    print("Spreadsheet created and CSV uploaded in your Google Drive.")
+    worksheet.update( data, "A1")
+    print(f"CSV {csv_name} uploaded to {worksheet} in your Google Drive.")
 
 
 if __name__ == "__main__":
-    Create_and_Write_To_Spreadsheet("tester.csv", "new_spreadsheet test" , "trevor's_token.json")
+
+    client = connect_to_client("trevor's_token.json")
+
+    sh = open_spreadsheet(client, "new_spreadsheet test")
+    ws = open_worksheet(sh, "Sheet1")
+    upload_csv_to_worksheet(ws, "test.csv")

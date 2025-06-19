@@ -2,8 +2,9 @@ import requests
 from dotenv import load_dotenv
 import os
 import json
-
-
+import csv
+import flatdict
+import pandas
 # You must have a file called .env that has a line API_KEY=your-key
 # replacing your-key with the api key that you get from the riot developer portal
 load_dotenv()
@@ -57,7 +58,7 @@ def Get_Summoner(Puuid):
 
 def Get_Match_history(Puuid):
     url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{Puuid}/ids"
-    response = requests.get(url, headers=headers, params={"count" :5})
+    response = requests.get(url, headers=headers, params={"count" :10})
 
     if response.status_code == 200:
         return response.json()
@@ -81,10 +82,15 @@ def Match_data_from_match_id(match_id, player_puuid):
 
 
 def main():
-    print(SUMMONERS)
-    for x, y in SUMMONERS.items():
-        print( "test")
-        print(y["tag"])
+    print(SUMMONERS["Trevor"]["Puuid"])
+    history = Get_Match_history(SUMMONERS["Trevor"]["Puuid"])
+    match_data = Match_data_from_match_id(history[7], SUMMONERS["Trevor"]["Puuid"])
+    
+    print(type(match_data))
+    print(f"{match_data['riotIdGameName']} played {match_data['championName']} and had {match_data['kills']} kills and spent {match_data['totalTimeSpentDead']} seconds dead.")
+    match_data = flatdict.FlatDict(match_data)
+    match_data = pandas.DataFrame([match_data])
+    match_data.to_csv('output.csv')
     """
     puuid = Get_Puuid(REGION,SUMMONER_NAME, TAG_LINE)
     print("Puuid is" , puuid)
