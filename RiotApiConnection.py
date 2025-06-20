@@ -69,6 +69,7 @@ def Get_Match_history(Puuid):
 
 def Match_data_from_match_id(match_id, player_puuid):
     url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}?{RIOT_API_KEY}"
+
     response = requests.get(url, headers=headers)
         #checks if the response is valid
     if response.status_code == 200:
@@ -76,35 +77,21 @@ def Match_data_from_match_id(match_id, player_puuid):
         data = response.json()
         for player in data["info"]["participants"]:
             if player["puuid"] == player_puuid:
-                return player
+                    return {"player": player, "metadata": data.get("metadata", {})}
     else:
         raise Exception(f"Failed to get Puuid: {response.status_code} - {response.text}")
 
 
 def main():
-    print(SUMMONERS["Trevor"]["Puuid"])
-    history = Get_Match_history(SUMMONERS["Trevor"]["Puuid"])
-    match_data = Match_data_from_match_id(history[7], SUMMONERS["Trevor"]["Puuid"])
+    print(SUMMONERS["Trevor"]["puuid"])
+    history = Get_Match_history(SUMMONERS["Trevor"]["puuid"])
+    match_data = Match_data_from_match_id(history[7], SUMMONERS["Trevor"]["puuid"])
     
-    print(type(match_data))
+
     print(f"{match_data['riotIdGameName']} played {match_data['championName']} and had {match_data['kills']} kills and spent {match_data['totalTimeSpentDead']} seconds dead.")
     match_data = flatdict.FlatDict(match_data)
     match_data = pandas.DataFrame([match_data])
     match_data.to_csv('output.csv')
-    """
-    puuid = Get_Puuid(REGION,SUMMONER_NAME, TAG_LINE)
-    print("Puuid is" , puuid)
-
-
-    history = Get_Match_history(puuid)
-    time = 0
-    for match in history:
-
-        recent_game = Match_data_from_match_id(history[0], puuid)
-        time += recent_game['totalTimeSpentDead']
-    print(time)
-    print(f"{recent_game['riotIdGameName']} played {recent_game['championName']} and had {recent_game['kills']} kills and spent {recent_game['totalTimeSpentDead']} seconds dead.")
-    """
 
 
 

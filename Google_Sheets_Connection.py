@@ -51,8 +51,6 @@ def open_worksheet(spreadsheet, name):
 
 #takes a worksheet and file path of a .csv file and clears the worksheet before upload the contents of the csv file
 def upload_csv_to_worksheet(worksheet, csv_name):
-
-    worksheet.clear()
     with open(csv_name, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
         data = list(reader)
@@ -66,4 +64,4 @@ if __name__ == "__main__":
 
     sh = open_spreadsheet(client, "new_spreadsheet test")
     ws = open_worksheet(sh, "Sheet1")
-    upload_csv_to_worksheet(ws, "test.csv")
+    upload_csv_to_worksheet(ws, "output.csv")
