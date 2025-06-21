@@ -77,7 +77,9 @@ def Match_data_from_match_id(match_id, player_puuid):
         data = response.json()
         for player in data["info"]["participants"]:
             if player["puuid"] == player_puuid:
-                    return {"player": player, "metadata": data.get("metadata", {})}
+                    info_copy = data.get("info", {}).copy()
+                    info_copy.pop("participants", None)
+                    return {"player": player, "metadata": data.get("metadata", {}), "info" : info_copy}
     else:
         raise Exception(f"Failed to get Puuid: {response.status_code} - {response.text}")
 
@@ -87,8 +89,8 @@ def main():
     history = Get_Match_history(SUMMONERS["Trevor"]["puuid"])
     match_data = Match_data_from_match_id(history[7], SUMMONERS["Trevor"]["puuid"])
     
-
-    print(f"{match_data['riotIdGameName']} played {match_data['championName']} and had {match_data['kills']} kills and spent {match_data['totalTimeSpentDead']} seconds dead.")
+    print(match_data["metadata"])
+    print(f" played {match_data['championName']} and had {match_data['kills']} kills and spent {match_data['totalTimeSpentDead']} seconds dead.")
     match_data = flatdict.FlatDict(match_data)
     match_data = pandas.DataFrame([match_data])
     match_data.to_csv('output.csv')

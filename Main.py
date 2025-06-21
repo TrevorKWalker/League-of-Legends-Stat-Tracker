@@ -9,13 +9,14 @@ import pandas
 import json
 import os
 import dotenv
+import gspread
 
 #API and ENV data
 dotenv.load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 SUMMONERS = json.loads(os.getenv("Summoners"))
 
-
+EXPECTED_COLUMNS = list(pandas.read_csv("columns.csv").columns)
 
 
 def match_data_to_csv(match_id, match_data, file ):
@@ -24,6 +25,9 @@ def match_data_to_csv(match_id, match_data, file ):
     else:
         match_data = pandas.DataFrame([match_data])
     match_data.insert(loc=0, column='MatchId', value=match_id)
+
+    match_data = match_data.reindex(columns=EXPECTED_COLUMNS)
+
     match_data.to_csv(file)
 
 
@@ -36,7 +40,6 @@ def batch_grab_match_data(match_ids, puuid):
 
 def find_work_sheet(name, spreadsheet):
     worksheets = spreadsheet.worksheets()
-    print(worksheets)
     for ws in worksheets:
         
         if  name == ws.title:
@@ -46,7 +49,7 @@ def find_work_sheet(name, spreadsheet):
 
 def create_new_player(Name, spreadsheet, file):
     #connection to Riot Api
-    puuid = RAC.Get_Puuid(SUMMONERS[Name]["region"], SUMMONERS[Name]["Summoner_name"], SUMMONERS[Name]["tag"])
+    puuid = RAC.Get_Puuid(SUMMONERS[Name]["region"], SUMMONERS[Name]["summoner_name"], SUMMONERS[Name]["tag"])
     match_ids = RAC.Get_Match_history(puuid)
     matches = batch_grab_match_data(match_ids, puuid)
     
@@ -65,14 +68,34 @@ def create_new_player(Name, spreadsheet, file):
 
 
 
-def update_player_sheet():
-    
-    history = RAC.Get_Match_history(SUMMONERS["Trevor"]["Puuid"])
-    match_data = RAC.Match_data_from_match_id(history[7], SUMMONERS["Trevor"]["Puuid"])
+def update_player_sheet(name, spreadsheet, file):
+    client = GSC.connect_to_client("trevor's_token.json")
+    sh = GSC.open_spreadsheet(client, spreadsheet)
 
+    if find_work_sheet(name, sh):
+        ws = ws = GSC.open_worksheet(sh, name)
+        last_match_id = ws.acell('B2').value
+        match_ids = RAC.Get_Match_history(SUMMONERS[name]["puuid"])
+
+        for index, id in enumerate(match_ids):
+            if id == last_match_id:
+                match_ids = match_ids[0:index]
+
+        matches = batch_grab_match_data(match_ids,SUMMONERS[name]["puuid"] )
+        match_data_to_csv(match_ids, matches, file)
+        ws.insert_rows([['']] * len(match_ids), row = 2 )
+        with open(file, newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+        ws.update(rows, "A1")
+
+    else:
+        create_new_player(name, spreadsheet, file)
 
 def main():
-    create_new_player("Trevor", "new_spreadsheet test", "output.csv")
+    update_player_sheet("Trevor", "new_spreadsheet test", "output.csv")
+    #create_new_player("Trevor", "new_spreadsheet test", "output.csv")
+
 
 if __name__ == "__main__":
     main()
