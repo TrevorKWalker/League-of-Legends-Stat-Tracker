@@ -26,7 +26,7 @@ async def on_ready():
 
 
 
-# new user command  
+# command to create a new user and put thier last 20 gmaes in the sheet  
 @bot.command(name="new_user")
 async def new_user(ctx, name ,summoner_name, tag, region):
     # check to see is the user is already accounted for
@@ -61,7 +61,7 @@ async def new_user(ctx, name ,summoner_name, tag, region):
             # update_summoners re-initializes the SUMMONERS variable that is held in Connections.py
             # then creates the player which adds them to the sheet and populates their last ten games
             Connections.update_SUMMONERS()
-            Connections.create_new_player(name, "Discord bot stats", "output.csv")
+            Connections.create_new_player(name, "Discord bot stats")
         except:
             #if it fails we need to remove it from the json file so we pop and then write the new one to the file
             SUMMONERS.pop(name)
@@ -71,18 +71,26 @@ async def new_user(ctx, name ,summoner_name, tag, region):
             return
         await ctx.send(f'{name} Successfully registered. 👍')
 
+#command to update the spreadsheet with the specified user.
 @bot.command(name="update_user")
 async def update_user(ctx, name):
+    #check to make sure the name is valid and in our list
     if name in SUMMONERS:
+        #if it is then we use a try except to catch any errors and call the update function
         try:
             Connections.update_player_sheet(name, "Discord bot stats", "output.csv")
+            #if the update was successful then when inform the user
             await ctx.send(f"{name}\'s sheet was successfully updated.")
         except:
+            #if the user is in the sheet but can't be update there is probably an api problem
+            # so we inform the user that there was an error
             await ctx.send("There was an error in updating the user. Please try again later.")
     else:
-        await ctx.send("User not found. please check your spelling and try again.")
+        #if they aren't found in our list then we tell the user to add the user
+        await ctx.send("User not found. please check your spelling and try again or use !new_user command to add the user.")
+
 # command to view the credits for the project which includes my linkedIn, Github and Instagram
-@bot.command()
+@bot.command(name= "credit", aliases= ["creator", "owner", "support"])
 async def credit(ctx):
     embed = discord.Embed(
         title="Trevor Walker",
