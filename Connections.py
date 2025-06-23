@@ -76,18 +76,13 @@ def create_new_player(Name, spreadsheet, file):
 def update_player_sheet(name, spreadsheet, file):
     client = GSC.connect_to_client("trevor's_token.json")
     sh = GSC.open_spreadsheet(client, spreadsheet)
-
     if find_work_sheet(name, sh):
-        ws = ws = GSC.open_worksheet(sh, name)
+        ws = GSC.open_worksheet(sh, name)
         last_match_id = ws.acell('B2').value
         match_ids = RAC.Get_Match_history(SUMMONERS[name]["puuid"])
-        print(match_ids)
-
         for index, id in enumerate(match_ids):
             if id == last_match_id:
-                print(index)
                 match_ids = match_ids[0:index]
-        print(match_ids)
 
         matches = batch_grab_match_data(match_ids,SUMMONERS[name]["puuid"] )
         match_data_to_csv(match_ids, matches, file)
@@ -101,9 +96,9 @@ def update_player_sheet(name, spreadsheet, file):
         create_new_player(name, spreadsheet, file)
 
 def main():
-    #for person in SUMMONERS:
-    #    update_player_sheet(person, "Discord bot stats", "output.csv")
-    #    time.sleep(60)
+    for person in SUMMONERS:
+        update_player_sheet(person, "Discord bot stats", "output.csv")
+        time.sleep(60)
     #create_new_player("Trevor", "new_spreadsheet test", "output.csv")
     pass
 

@@ -21,14 +21,13 @@ bot = commands.Bot(command_prefix="!", intents=intents, help_command=None, case_
 
 @bot.event
 async def on_ready():
-    
+    Connections.update_SUMMONERS()
     print(f'✅ Logged in as {bot.user}')
 
 
-#####################
-# new user command  #
-#####################
-@bot.command()
+
+# new user command  
+@bot.command(name="new_user")
 async def new_user(ctx, name ,summoner_name, tag, region):
     # check to see is the user is already accounted for
     if name in SUMMONERS:
@@ -72,6 +71,39 @@ async def new_user(ctx, name ,summoner_name, tag, region):
             return
         await ctx.send(f'{name} Successfully registered. 👍')
 
+@bot.command(name="update_user")
+async def update_user(ctx, name):
+    if name in SUMMONERS:
+        try:
+            Connections.update_player_sheet(name, "Discord bot stats", "output.csv")
+            await ctx.send(f"{name}\'s sheet was successfully updated.")
+        except:
+            await ctx.send("There was an error in updating the user. Please try again later.")
+    else:
+        await ctx.send("User not found. please check your spelling and try again.")
+# command to view the credits for the project which includes my linkedIn, Github and Instagram
+@bot.command()
+async def credit(ctx):
+    embed = discord.Embed(
+        title="Trevor Walker",
+        description="This bot was fully coded and created by Trevor Walker",
+        color=discord.Color.blurple()
+    )
+    embed.add_field(name="LinkedIn",
+        value= "[link](https://www.linkedin.com/in/trevor-kylan-walker/)\n ",                
+        inline= False                   
+    )
+    embed.add_field(name="Github",
+        value= "[link](https://github.com/TrevorKWalker?tab=repositories) \nThe code for this discord bot is availible on my Github.\n ",                
+        inline= False                   
+    )
+    embed.add_field(name="Instagram",
+        value= "[link](https://www.instagram.com/trevor_walker_77)",                
+        inline= False                   
+    )
+    #footer that gives me credit
+    embed.set_footer(text="Made by: Trevor Walker", icon_url="https://i.imgur.com/9vBTKl0.png") 
+    await ctx.send(embed=embed)
 
 @bot.command(name="help", aliases=["commands"])
 async def help_command(ctx, command = None):
@@ -86,18 +118,19 @@ async def help_command(ctx, command = None):
             color=discord.Color.blurple()
         )
         #this is our field where we will put all of the availible commands
-        embed.add_field(name="!new_user <name> <summoner name> <tag> <region>\n!remove_user <name>\n!display_scoreboard\n!credit",
+        embed.add_field(name="!new_user <name> <summoner name> <tag> <region>\n!update_user <name> \n!remove_user <name>\n!display_scoreboard\n!credit",
             value= "",                
             inline= False      
                         
         )
     elif command == "new_user" or command == "!new_user":
+        # an embed object that contains details on how to use the new_user command
         embed = discord.Embed(
             title="📖 new_user Help",
             description="!new_user <name> <summoner name> <tag> <region>",
             color=discord.Color.blurple()
         )
-        #this is our field where we will put all of the availible commands
+        #Descriptions of each section of the new_user command
         embed.add_field(name="<name>",
             value= "The name field is an alphanumeric string that will be used as the name for your sheet and your user. I suggest you use your real name or discord username. If you include any spaces be sure to wrap your name in quotes.",                
             inline= False                   
@@ -112,6 +145,24 @@ async def help_command(ctx, command = None):
         )
         embed.add_field(name="<region>",
             value= "This field should be the region that your account is from. e.g. 'americas' ",                
+            inline= False                   
+        )
+    elif command == "credit" or command == "credits":
+        embed = discord.Embed(
+            title="Trevor Walker",
+            description="This bot was fully coded and created by Trevor Walker",
+            color=discord.Color.blurple()
+        )
+        embed.add_field(name="LinkedIn",
+            value= "[link](https://www.linkedin.com/in/trevor-kylan-walker/)\n ",                
+            inline= False                   
+        )
+        embed.add_field(name="Github",
+            value= "[link](https://github.com/TrevorKWalker?tab=repositories) \nThe code for this discord bot is availible on my Github.\n ",                
+            inline= False                   
+        )
+        embed.add_field(name="Instagram",
+            value= "[link](https://www.instagram.com/trevor_walker_77)",                
             inline= False                   
         )
     #footer that gives me credit

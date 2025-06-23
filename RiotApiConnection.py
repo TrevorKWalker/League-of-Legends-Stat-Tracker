@@ -59,7 +59,7 @@ def Get_Summoner(Puuid):
 
 def Get_Match_history(Puuid):
     url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{Puuid}/ids"
-    response = requests.get(url, headers=headers, params={"count" :10})
+    response = requests.get(url, headers=headers, params={"count" :20})
 
     if response.status_code == 200:
         return response.json()
