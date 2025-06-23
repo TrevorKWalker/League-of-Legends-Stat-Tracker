@@ -12,7 +12,8 @@ RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 
 
 
-SUMMONERS = json.loads(os.getenv("Summoners"))
+with open("People.json", "r") as f:
+    SUMMONERS = json.load(f)
 
 
 
@@ -98,4 +99,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print(Get_Puuid("americas", "mr patrick", "NA1"))
+    print(Get_Puuid("americas", "jamminxdd", "NA1"))
+    print(Get_Puuid("americas", "Snow Runt", "NA1"))
+    print(Get_Puuid("americas", "Inkum", "NA1"))
+    print(Get_Puuid("americas", "Cupcakefroster", "NA1"))
+    print(Get_Puuid("americas", "Dorkus Aurelius", "NA1"))
+    print(Get_Puuid("americas", "i love you", "gigaW"))
+    print(Get_Puuid("americas", "ItsMeBBSUCC", "NA1"))
+    #main()

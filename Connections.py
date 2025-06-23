@@ -10,14 +10,19 @@ import json
 import os
 import dotenv
 import gspread
-
+import time
 #API and ENV data
 dotenv.load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
-SUMMONERS = json.loads(os.getenv("Summoners"))
+SUMMONERS = None
 
 EXPECTED_COLUMNS = list(pandas.read_csv("columns.csv").columns)
 
+
+def update_SUMMONERS():
+    with open("People.json", "r") as f: 
+        global SUMMONERS
+        SUMMONERS = json.load(f)
 
 def match_data_to_csv(match_id, match_data, file ):
     if isinstance(match_id, list):
@@ -76,10 +81,13 @@ def update_player_sheet(name, spreadsheet, file):
         ws = ws = GSC.open_worksheet(sh, name)
         last_match_id = ws.acell('B2').value
         match_ids = RAC.Get_Match_history(SUMMONERS[name]["puuid"])
+        print(match_ids)
 
         for index, id in enumerate(match_ids):
             if id == last_match_id:
+                print(index)
                 match_ids = match_ids[0:index]
+        print(match_ids)
 
         matches = batch_grab_match_data(match_ids,SUMMONERS[name]["puuid"] )
         match_data_to_csv(match_ids, matches, file)
@@ -93,9 +101,16 @@ def update_player_sheet(name, spreadsheet, file):
         create_new_player(name, spreadsheet, file)
 
 def main():
-    update_player_sheet("Trevor", "new_spreadsheet test", "output.csv")
+    #for person in SUMMONERS:
+    #    update_player_sheet(person, "Discord bot stats", "output.csv")
+    #    time.sleep(60)
     #create_new_player("Trevor", "new_spreadsheet test", "output.csv")
+    pass
 
 
 if __name__ == "__main__":
+    update_SUMMONERS()
+    #for person in SUMMONERS:
+    #    print(person)
+
     main()
