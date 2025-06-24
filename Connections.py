@@ -16,6 +16,7 @@ dotenv.load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 SUMMONERS = None
 
+
 #list of the normalized columns so that all entries contain the same number of  columns and in the right order
 # This is needed because some games the api wont gather data on certain events if they aren't applicable like baron gold advantage
 EXPECTED_COLUMNS = list(pandas.read_csv("columns.csv").columns)
@@ -137,6 +138,79 @@ def update_player_sheet(name, spreadsheet):
         #if we cant find the worksheet we treat it as a new player
         #this shouldn't ever happen due to the error checking in discord_bot.py
         create_new_player(name, spreadsheet)
+
+
+
+
+##### function to create a scoreboard
+# will do two things: update the scoreboard page of the google sheets and create a Current_scoreboard.json with all the data
+# stat needs to be a valid key found in scoreboards.json same with qualifier
+def create_scoreboard(spreadsheet, stat, qualifier):
+    #open scoreboards.json which holds all valid scoreboards
+    with open("scoreboards.json", "r") as f:
+        scoreboards = json.load(f)
+    #error is raised if our key doesnt match
+    if stat not in scoreboards:
+        raise KeyError
+    #error is raised if our key doesnt match
+    if qualifier not in scoreboards[stat]:
+        raise KeyError
+    # establish a connection to the google drive account and then to the spreadsheet to allow for error checking
+    client = GSC.connect_to_client("trevor's_token.json")
+    sh = GSC.open_spreadsheet(client, spreadsheet)
+
+    #create our dicitonary for holding all the data we need
+    new_board = {}
+    #start time allows us to check against games and check how long the scoreboard has been running for
+    start_time = time.time()
+
+    #these statments initialize the board with all the information that is found in scoreboards.json
+    new_board["title"] = scoreboards[stat][qualifier]["title"]
+    new_board["description"] = scoreboards[stat][qualifier]["description"]
+    new_board["start_time"] = start_time
+    new_board["stat"] = scoreboards[stat][qualifier]["stat"]
+    new_board["participants"] = {}
+    new_board["sort_reverse"] = scoreboards[stat][qualifier]["sort_reverse"]
+
+    #get all worksheets
+    worksheets = sh.worksheets()
+    #iterates through every worksheet and checks the name
+    for ws in worksheets:
+        # as long as the names arent one of the two non player sheets we add the player and initialize to none
+        if ws.title != "HOME" and ws.title != "Scoreboard":
+            new_board["participants"][ws.title] = None
+    # write our board to the current_board.json file to save it
+    with open("Curent_scorboard.json", "w") as f:
+        json.dump(new_board, f, indent = 2)
+    
+    #This part is to update the google spreadsheet and more specically the Scoreboard worksheet
+    scoreboard_ws = GSC.open_worksheet(sh,"Scoreboard")
+    scoreboard_ws.update("A1", [[new_board["title"]]])
+    scoreboard_ws.update("A5", [[new_board["description"]]])
+    scoreboard_ws.update("A8", [["Participants"]])
+    scoreboard_ws.update("C8", [[new_board["stat"]]])
+    index = 9
+    for participant in new_board["participants"]:
+        scoreboard_ws.update(f"A{index}",[[participant]])
+        scoreboard_ws.update(f"C{index}", [[new_board["participants"][participant]]])
+        index += 1
+
+
+
+
+def update_scoreboard():
+    with open("Curent_scorboard.json", "r") as f:
+        board = json.load(f)
+    client = GSC.connect_to_client("trevor's_token.json")
+    sh = GSC.open_spreadsheet(client, "Discord bot stats")
+
+    #data = scoreboard_ws.get_all_values()
+    #rows = data[8:]
+    #rows.sort(key=lambda x: int(x[2]), reverse= board["sort_reverse"])
+    #scoreboard_ws.update("A9", rows)
+
+
+
 
 
 

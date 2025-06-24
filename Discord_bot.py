@@ -13,6 +13,8 @@ with open("People.json", "r") as f:
 load_dotenv()
 DISCORD_API_KEY = os.getenv("DISCORD_API_KEY")
 
+
+
 intents = discord.Intents.default()
 intents.message_content = True 
  
@@ -24,7 +26,16 @@ async def on_ready():
     Connections.update_SUMMONERS()
     print(f'✅ Logged in as {bot.user}')
 
+@bot.command(name= "create_scoreboard")
+@commands.has_role("League_stat_admin")
+async def create_scoreboard(ctx, stat, qualifier):
+    Connections.create_scoreboard("Discord bot stats", stat , qualifier)
 
+
+
+@bot.command(name= "display_scoreboard")
+async def display_scoreboard(ctx):
+    pass
 
 # command to create a new user and put thier last 20 gmaes in the sheet  
 @bot.command(name="new_user")

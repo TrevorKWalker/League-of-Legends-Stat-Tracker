@@ -1,0 +1,16 @@
+{
+    "player:kills":{
+        "most": {
+            "title": "Most Kills Scoreboard",
+            "description" : "Players are ranked based on their highest kill game this week",
+            "stat": "kills",
+            "sort_reverse" : true
+        },
+        "least": {
+            "title": "Least Kills Scoreboard",
+            "description" : "Players are ranked based on their lowest kill game this week",
+            "stat": "kills",
+            "sort_reverse" : false
+        }
+    }
+}
