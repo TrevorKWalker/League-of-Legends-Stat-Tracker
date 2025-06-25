@@ -4,12 +4,16 @@
             "title": "Most Kills Scoreboard",
             "description" : "Players are ranked based on their highest kill game this week",
             "stat": "kills",
+            "column" :219,
+            "function" : "max",
             "sort_reverse" : true
         },
         "least": {
             "title": "Least Kills Scoreboard",
             "description" : "Players are ranked based on their lowest kill game this week",
             "stat": "kills",
+            "column" :219,
+            "function" : "min",
             "sort_reverse" : false
         }
     }

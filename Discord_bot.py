@@ -6,6 +6,7 @@ import json
 import RiotApiConnection as RAC
 import Connections
 import Google_Sheets_Connection as GSC
+import asyncio
 
 with open("People.json", "r") as f: 
         SUMMONERS = json.load(f)
@@ -30,7 +31,11 @@ async def on_ready():
 @commands.has_role("League_stat_admin")
 async def create_scoreboard(ctx, stat, qualifier):
     Connections.create_scoreboard("Discord bot stats", stat , qualifier)
+    await ctx.send("New scoreboard has be created. View it with !display_scoreboard.")
 
+@bot.command(name = "update_scoreboard")
+async def update_scoreboard(ctx):
+    Connections.update_scoreboard()
 
 
 @bot.command(name= "display_scoreboard")
@@ -99,6 +104,14 @@ async def update_user(ctx, name):
     else:
         #if they aren't found in our list then we tell the user to add the user
         await ctx.send("User not found. please check your spelling and try again or use !new_user command to add the user.")
+
+@bot.command(name="update_all")
+@commands.has_role("League_stat_admin")
+async def update_all(ctx):
+    for player in SUMMONERS:
+        print(player)
+        await update_user(ctx, player)
+        await asyncio.sleep(60)
 
 # command to view the credits for the project which includes my linkedIn, Github and Instagram
 @bot.command(name= "credit", aliases= ["creator", "owner", "support"])

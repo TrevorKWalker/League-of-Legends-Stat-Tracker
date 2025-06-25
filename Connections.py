@@ -165,20 +165,19 @@ def create_scoreboard(spreadsheet, stat, qualifier):
     start_time = time.time()
 
     #these statments initialize the board with all the information that is found in scoreboards.json
-    new_board["title"] = scoreboards[stat][qualifier]["title"]
-    new_board["description"] = scoreboards[stat][qualifier]["description"]
-    new_board["start_time"] = start_time
-    new_board["stat"] = scoreboards[stat][qualifier]["stat"]
-    new_board["participants"] = {}
-    new_board["sort_reverse"] = scoreboards[stat][qualifier]["sort_reverse"]
+    new_board = scoreboards[stat][qualifier]
 
+    new_board["start_time"] = start_time * 1000
+    new_board["participants"] = {}
     #get all worksheets
     worksheets = sh.worksheets()
     #iterates through every worksheet and checks the name
-    for ws in worksheets:
+    """for ws in worksheets:
         # as long as the names arent one of the two non player sheets we add the player and initialize to none
         if ws.title != "HOME" and ws.title != "Scoreboard":
-            new_board["participants"][ws.title] = None
+            if new_board["function"] == "max":
+                new_board["participants"][ws.title] = 0"""
+            
     # write our board to the current_board.json file to save it
     with open("Curent_scorboard.json", "w") as f:
         json.dump(new_board, f, indent = 2)
@@ -203,11 +202,42 @@ def update_scoreboard():
         board = json.load(f)
     client = GSC.connect_to_client("trevor's_token.json")
     sh = GSC.open_spreadsheet(client, "Discord bot stats")
+    scoreboard_ws = GSC.open_worksheet(sh,"Scoreboard")
+    for player in SUMMONERS:
+        ws = GSC.open_worksheet(sh, player)
+        
+        times = ws.col_values(4)[1:]
+        for index, time in enumerate(times):
+            if float(time) < board["start_time"]:
+                times = times[:index]
+                continue
+        if(len(times) != 0):
+            stat = None
+            if board["function"] == "max":
+                stat = max([int(x) for x in ws.col_values(board["column"])[1:len(times)+1]])
+            elif board["function"] == "min":
+                stat = max([int(x) for x in ws.col_values(board["column"])[1:len(times)+1]])
+                
+            if stat is not None:
+                if player not in board["participants"]:
+                    board["participants"][player] = stat
+                elif stat > board["participants"][player]:
+                    board["participants"][player] = stat
+    with open("Curent_scorboard.json", "w") as f:
+        json.dump(board, f, indent = 2)
+    data =[]
+    for key, value in board["participants"].items():
+        data.append([key, "", value])
+    scoreboard_ws.update(data,"A9")
+    
+    data = scoreboard_ws.get_all_values()
+    rows = data[8:]
+    rows.sort(key=lambda x: int(x[2]), reverse= board["sort_reverse"])
 
-    #data = scoreboard_ws.get_all_values()
-    #rows = data[8:]
-    #rows.sort(key=lambda x: int(x[2]), reverse= board["sort_reverse"])
-    #scoreboard_ws.update("A9", rows)
+    result = {row[0]: row[2] for row in data if len(row) >= 3 and row[0]}
+    board
+    scoreboard_ws.update("A9", rows)
+
 
 
 
@@ -228,5 +258,6 @@ def main():
 
 
 if __name__ == "__main__":
-    update_SUMMONERS()
-    main()
+    pass
+    #update_SUMMONERS()
+    #main()

@@ -1,20 +1,17 @@
 {
   "title": "Most Kills Scoreboard",
   "description": "Players are ranked based on their highest kill game this week",
-  "start_time": 1750797038.2688937,
   "stat": "kills",
+  "column": 219,
+  "function": "max",
+  "sort_reverse": true,
+  "start_time": 1750589487814.1428,
   "participants": {
-    "Trevor": null,
-    "Micheal": null,
-    "Henry": null,
-    "Patrick": null,
-    "Ben": null,
-    "Brad": null,
-    "Jareth": null,
-    "Carter": null,
-    "Jewel": null,
-    "Bea": null,
-    "Zander": null,
-    "Mark": null
+    "Trevor": 15,
+    "Micheal": 4,
+    "Henry": 10,
+    "Ben": 6,
+    "Brad": 4,
+    "Mark": 8
   }
 }
