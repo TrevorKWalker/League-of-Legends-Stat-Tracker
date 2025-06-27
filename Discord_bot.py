@@ -36,6 +36,7 @@ async def create_scoreboard(ctx, stat, qualifier):
 @bot.command(name = "update_scoreboard")
 async def update_scoreboard(ctx):
     Connections.update_scoreboard()
+    await ctx.send("Scoreboard Successfully updated. view with !display_scoreboard")
 
 
 @bot.command(name= "display_scoreboard")
@@ -94,7 +95,7 @@ async def update_user(ctx, name):
     if name in SUMMONERS:
         #if it is then we use a try except to catch any errors and call the update function
         try:
-            Connections.update_player_sheet(name, "Discord bot stats", "output.csv")
+            Connections.update_player_sheet(name, "Discord bot stats")
             #if the update was successful then when inform the user
             await ctx.send(f"{name}\'s sheet was successfully updated.")
         except:

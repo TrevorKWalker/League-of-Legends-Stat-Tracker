@@ -3,6 +3,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth import default
 from google.oauth2.credentials import Credentials
+from google.oauth2.service_account import Credentials as service_account
 import os
 import csv
 
@@ -33,6 +34,11 @@ def connect_to_client(token_path):
     client = gspread.authorize(creds)
     return client
 
+def service_account_connection(service_account_path):
+    creds = service_account.from_service_account_file(service_account_path, scopes=SCOPES)
+    client = gspread.authorize(creds)
+    return client
+
 # these next fours functions aren't neccassary as they are one line and therefore kinda redundant and useless
 ########################################
 # Creates a spreadsheet with a given name
@@ -60,8 +66,7 @@ def upload_csv_to_worksheet(worksheet, csv_name):
 
 if __name__ == "__main__":
 
-    client = connect_to_client("trevor's_token.json")
-
-    sh = open_spreadsheet(client, "new_spreadsheet test")
-    ws = open_worksheet(sh, "Sheet1")
-    upload_csv_to_worksheet(ws, "output.csv")
+    client = service_account_connection("service_account.json")
+    sh = open_spreadsheet(client, "Discord bot stats")
+    ws = open_worksheet(sh, "Trevor")
+    print([int(x) for x in ws.col_values(219)[1:3+1]])

@@ -11,6 +11,7 @@ import os
 import dotenv
 import gspread
 import time
+import statistics
 #API and ENV data
 dotenv.load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
@@ -84,7 +85,7 @@ def create_new_player(Name, spreadsheet):
 
     #### write csv to google sheets
     #connects to the spreadsheet using my api key and opens it 
-    client = GSC.connect_to_client("trevor's_token.json")
+    client = GSC.service_account_connection("service_account.json")
     sh = GSC.open_spreadsheet(client, spreadsheet)
     #if the worksheet exist it opens it
     if find_work_sheet(Name, sh):
@@ -104,7 +105,7 @@ def create_new_player(Name, spreadsheet):
 # takes a name and spreadsheet where name is a key in the SUMMONERS data object and the name of a worksheet in the spreadsheet
 def update_player_sheet(name, spreadsheet):
     # establish a connection to the google drive account and then to the spreadsheet to allow for error checking
-    client = GSC.connect_to_client("trevor's_token.json")
+    client = GSC.service_account_connection("service_account.json")
     sh = GSC.open_spreadsheet(client, spreadsheet)
     # error checking for finding the worksheet
     if find_work_sheet(name, sh):
@@ -156,7 +157,7 @@ def create_scoreboard(spreadsheet, stat, qualifier):
     if qualifier not in scoreboards[stat]:
         raise KeyError
     # establish a connection to the google drive account and then to the spreadsheet to allow for error checking
-    client = GSC.connect_to_client("trevor's_token.json")
+    client = GSC.service_account_connection("service_account.json")
     sh = GSC.open_spreadsheet(client, spreadsheet)
 
     #create our dicitonary for holding all the data we need
@@ -200,15 +201,18 @@ def create_scoreboard(spreadsheet, stat, qualifier):
 def update_scoreboard():
     with open("Curent_scorboard.json", "r") as f:
         board = json.load(f)
-    client = GSC.connect_to_client("trevor's_token.json")
+    client = GSC.service_account_connection("service_account.json")
     sh = GSC.open_spreadsheet(client, "Discord bot stats")
+    now = time.time()
+    if(((board["start_time"] / 1000) + (604800)) < now):
+        pass
     scoreboard_ws = GSC.open_worksheet(sh,"Scoreboard")
     for player in SUMMONERS:
         ws = GSC.open_worksheet(sh, player)
         
         times = ws.col_values(4)[1:]
-        for index, time in enumerate(times):
-            if float(time) < board["start_time"]:
+        for index, game_time in enumerate(times):
+            if float(game_time) < board["start_time"]:
                 times = times[:index]
                 continue
         if(len(times) != 0):
@@ -217,7 +221,8 @@ def update_scoreboard():
                 stat = max([int(x) for x in ws.col_values(board["column"])[1:len(times)+1]])
             elif board["function"] == "min":
                 stat = max([int(x) for x in ws.col_values(board["column"])[1:len(times)+1]])
-                
+            elif board["function"] == "avg":
+                stat = statistics.mean([int(x) for x in ws.col_values(board["column"])[1:len(times)+1]])
             if stat is not None:
                 if player not in board["participants"]:
                     board["participants"][player] = stat
@@ -258,6 +263,11 @@ def main():
 
 
 if __name__ == "__main__":
-    pass
+    index = EXPECTED_COLUMNS.index("player:deaths")
+    print(time.time())
+    client = GSC.service_account_connection("service_account.json")
+    sh = GSC.open_spreadsheet(client, "Discord bot stats")
+    ws = GSC.open_worksheet(sh, "Trevor")
+    print([int(x) for x in ws.col_values(index+2)[1:7+1]])
     #update_SUMMONERS()
     #main()

@@ -1,20 +1,62 @@
 {
-    "player:kills":{
-        "most": {
+    "kills":{
+        "bestgame_high": {
             "title": "Most Kills Scoreboard",
-            "description" : "Players are ranked based on their highest kill game this week",
+            "description" : "Players are ranked based on their highest kill game this week. player with the best highest kill game wins",
             "stat": "kills",
             "column" :219,
             "function" : "max",
             "sort_reverse" : true
         },
-        "least": {
+        "bestgame_low": {
+            "title": "Most Kills Scoreboard",
+            "description" : "Players are ranked based on their highest kill game this week. player with the worst highest kill game wins.",
+            "stat": "kills",
+            "column" :219,
+            "function" : "max",
+            "sort_reverse" : false
+        },
+        "worstgame_low": {
             "title": "Least Kills Scoreboard",
-            "description" : "Players are ranked based on their lowest kill game this week",
+            "description" : "Players are ranked based on their lowest kill game this week.player with the least kills in their worst game wins.",
             "stat": "kills",
             "column" :219,
             "function" : "min",
             "sort_reverse" : false
+        },
+        "worstgame_high": {
+            "title": "Least Kills Scoreboard",
+            "description" : "Players are ranked based on their lowest kill game this week. player with the most kills in their worst game wins.\n i.e you have 3 games with kills of 3 ,6, 2 your score is 2.",
+            "stat": "kills",
+            "column" :219,
+            "function" : "min",
+            "sort_reverse" : true
+        },
+        "average_high": {
+            "title": "Average Kills Scoreboard",
+            "description" : "Players are ranked based on their average kills across all games this week",
+            "stat": "avg kills",
+            "column" :219,
+            "function" : "avg",
+            "sort_reverse" : true
+        },
+        "average_low": {
+            "title": "Average Kills Scoreboard",
+            "description" : "Players are ranked based on their average kills across all games this week",
+            "stat": "avg kills",
+            "column" :219,
+            "function" : "avg",
+            "sort_reverse" : false
+        }
+    },
+    "deaths":{
+        "bestgame_high": {
+            "title": "Most deaths Scoreboard",
+            "description" : "Players are ranked based on their highest death game this week. player with the best highest death game wins",
+            "stat": "deaths",
+            "column" :219,
+            "function" : "max",
+            "sort_reverse" : true
         }
     }
 }
